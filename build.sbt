@@ -83,7 +83,7 @@ lazy val doobie = project
 
 lazy val demo = project
   .in(file("demo"))
-  .enablePlugins(AutomateHeaderPlugin)
+  .enablePlugins(AutomateHeaderPlugin, JavaAppPackaging)
   .dependsOn(core, doobie)
   .settings(commonSettings)
   .settings(

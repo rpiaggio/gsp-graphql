@@ -17,12 +17,14 @@ import starwars.StarWarsService
 
 // #server
 object Main extends IOApp {
-  def run(args: List[String]) =
-    DemoServer.stream[IO].compile.drain.as(ExitCode.Success)
+  def run(args: List[String]) = {
+    val port = sys.env.get("PORT").map(_.toInt).getOrElse(8080)
+    DemoServer.stream[IO](port).compile.drain.as(ExitCode.Success)
+  }
 }
 
 object DemoServer {
-  def stream[F[_]: ConcurrentEffect : ContextShift](implicit T: Timer[F]): Stream[F, Nothing] = {
+  def stream[F[_]: ConcurrentEffect : ContextShift](port: Int)(implicit T: Timer[F]): Stream[F, Nothing] = {
     val blockingPool = Executors.newFixedThreadPool(4)
     val blocker = Blocker.liftExecutorService(blockingPool)
     val starWarsService = StarWarsService.service[F]
@@ -36,10 +38,12 @@ object DemoServer {
 
     val httpApp = Logger.httpApp(true, false)(httpApp0)
 
+    
+
     // Spin up the server ...
     for {
       exitCode <- BlazeServerBuilder[F]
-        .bindHttp(8080, "0.0.0.0")
+        .bindHttp(port, "0.0.0.0")
         .withHttpApp(httpApp)
         .serve
     } yield exitCode

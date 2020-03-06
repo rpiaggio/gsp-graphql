@@ -1,0 +1,1 @@
+web: demo/target/universal/stage/bin/gsp-graphql-demo
